@@ -1,17 +1,80 @@
 # Workflow Linter Server
 
+Workflow Linter Server (WLS) currently serves three functions:
 
-POST localhost:8080/workflow/bpmn/linter
-
-Multi-part form
-
-name: File
-
-type: file (.bpmn file)
+1. BPMN Linting through REST endpoints using Kotlin-Script (.kts) and YAML based configurations. 
+1. BPMN Sanitization: Using the linting capability, lint rules can be used to remove any xml content of a BPMN that is considered not sharable.  This is used in cases where you want to share your BPMN and have it render in a BPMN viewer (say in [BPMN.js](https://bpmn.io)), but you do not want to example all of the internals of the BPMN's xml such as documentation, expressions, scripts, headers, IO mappings, custom extensions, etc.
+1. OpenAPI/Swagger generator for the REST APIs defined by WLS.  This provides easy HTTP-Client integration with various workflow services and tools such as a BPMN Modeler, Deployment Orchestration, CI, etc.
 
 
+# Workflow Linting
 
-example output:
+Workflow linting is currently targeting for BPMN workflows.
+
+Linting Rules can be configured using two methods:
+
+1. YAML
+1. Kotlin-Script (.kts) files
+
+Execution of linting rules is performed through a REST Endpoint
+
+## Execution of Linting Rules: REST Endpoint
+
+**Option 1:**
+
+Create a Multi-Part Form with a file upload property.  Property name must be `file`.
+
+POST `localhost:8080/workflow/bpmn/linter`
+
+If the linting is successful a status-code of `200` will be returned.
+
+
+**Option 2:**
+
+POST `localhost:8080/workflow/bpmn/linter`
+
+XML Body: xml of the BPMN.
+
+Content-Type: `application/xml`
+
+If the linting is successful a status-code of `200` will be returned.
+
+
+### Linter Response
+
+The linter response will return a object with a `results` property.  
+Each property in the `results` object is a elementId in the XML (BaseElement.class).  
+This property contains a array of linting validation failures.
+
+For each linting validation failure, the following properties are provided:
+
+- `type`: the type of failure: `WARNING` or `ERROR`
+- `elementId`: the unique element ID.  This is the same ID that is in the parent. 
+- `elementType`: the model API full class path.  Used to uniquely identify the type of element.
+- `message`: the linting validation message returned by the linting failure.
+- `code`:  the linting validation code returned by the linting failure.
+
+When configuring linting rules, you can set the `message` and `code` values per linting rule.
+
+```json
+{
+    "results": {
+        "Task_1pjpqz0": [
+            {
+                "type": "WARNING",
+                "elementId": "Task_1pjpqz0",
+                "elementType": "io.zeebe.model.bpmn.instance.MultiInstanceLoopCharacteristics",
+                "message": "my linter warning",
+                "code": 0
+            }
+        ]
+    }
+}
+```
+
+The following is a successful lint response, where the lint rule was set to trigger for every element in the XML.
+
+This is a robust example to demonstrate the linting response capabilities and level of linting rules that can be created.
 
 ```json
 {
@@ -428,12 +491,12 @@ example output:
 
 ## Workflow Linter
 
-The workflow linter provides a linting/validation engine for BPMN workflows that are parsed by the Zeebe Model API.
+The workflow linter provides a linting/validation engine for BPMN workflows that are parsed by the BPMN Model API.
 
 The linter acts as a warning and error system allowing you to validate workflows during the modeling process, and you can 
-implement the linter at deployment time, so when deploying a workflow into the Zeebe Cluster, the deployment will be stopped if a model has warnings or errors defined in the linter rules.
+implement the linter at deployment time to ensure only valid models are deployed into their respective environments.
 
-### Linter Rules
+### YAML based linting rules
 
 1. Rules are additive.  One rule cannot cancel out another rule.
 1. Rules require a description, elementTypes, and a rule implementation.
@@ -443,8 +506,8 @@ implement the linter at deployment time, so when deploying a workflow into the Z
 1. See the User Task example below for common usage: "Only target ServiceTasks with a task type of `user-task`.  This means the rule will only apply when a Service Task defines a type of `user-task` 
 
 ```yaml
-orchestrator:
-  workflow-linter:
+
+workflow-linter:
     rules:
       global-rules:
         enable: false
@@ -455,7 +518,7 @@ orchestrator:
           allowedTypes:
             - some-type
             - user-task
-
+    
       user-task-rule:
         description: Specific rule for User Task Configuration of Service Tasks
         elementTypes:
@@ -479,25 +542,7 @@ orchestrator:
             - description
 ```
 
-
-Responses can be of a WARNING or ERROR
-
-```
-Element ---> serviceTask ServiceTask_1luzsfd
-Type: ERROR
-Code: 0
-Element Type: serviceTask
-Element Id: ServiceTask_1luzsfd
-Message: Missing Required Headers: [title, candidateGroups, formKey]
-
-Type: ERROR
-Code: 0
-Element Type: serviceTask
-Element Id: ServiceTask_1luzsfd
-Message: Found headers that are not part of Optional Headers list: [priority, assignee, candidateUsers, dueDate, description]
-```
-
-### Global Rules
+#### Global Rules
 
 If the `target` property configuration is **not** provided, then the rule will be applied globally to all Element Types defined in the rule.
 
@@ -505,7 +550,7 @@ Global rules can be a good way to implement some restrictions on your modeling t
 
 Global rules can be valuable naming conventions as well: "task types cannot start with a underscore `_`."
 
-### Element Type Rules (WIP)
+#### Element Type Rules (WIP)
 
 Working model is to have rule factories for each major Element Type (Service Task, Receive Task, Catch message, etc).
 
@@ -522,7 +567,7 @@ Element Type Rules provide specific rule implementations that focus on the Eleme
    1. Out-mapping restrictions.
 
 
-### Formatting Rules (WIP)
+#### Formatting Rules (WIP)
 
 The Linter is not just about execution implementation rules, you can also define formatting rules for the BPMN.
 
@@ -543,7 +588,7 @@ Formatting rules enable you to prevent common errors in formatting of BPMN.
 1. .. More?
 
 
-### TODO
+#### YAML based linting rules TODO
 
 1. Add support to define what will prevent a deployment (WARNING / ERRORS)
 1. Add optional parameter on deployment endpoint to validate using linter
@@ -557,9 +602,22 @@ Formatting rules enable you to prevent common errors in formatting of BPMN.
 1. Add targeting based on BPMN Process Key
 1. Add special negating rule for Task Types and Correlation Keys
 1. Add Allowed Call Activity Process IDs: Rule to ensure only specific Process IDs can be called through the Modeler.
+1. Add error code and error message YAML config examples
 
 
-## Workflow Sanitizer
+### Kotlin-Script (.kts) based linting rules
+
+Kotlin Script `.kts` linting rules provide a scripting based approach to writing linting rules.  Using the scripting approach provides rule writers the most flexibility and power, but requires more advanced skills compared to writing YAML based linting rules.
+
+Configure the paths of your .kts files in the configuration (@TODO)
+
+Each script will be compiled are runtime and converted into ElementValidators.
+
+```kotlin
+example goes here
+```
+
+# Workflow Sanitizer
 
 Workflow Sanitizer is the capability to remove aspects of a BPMN that are internal configuration that should not be shared when allowing users to download BPMN xml (such as when rendering a BPMN in the bpmn.js / bpmn.io modeler).
 
@@ -588,3 +646,25 @@ What is explicitly not kept?
 1. IO Mappings
 1. Loop Characteristic configurations (the "parallel" vs "sequential" marking is kept)
 1. Message Elements (even if a message is not tied to a element )
+
+
+## Sanitizer Rest Endpoint
+
+POST localhost
+
+XML body and file upload options
+
+```xml
+body example goes here
+```
+
+Response
+
+```xml
+XML response goes here
+```
+
+
+# OpenAPI/Swagger Documentation
+
+see openapi docs folder for generated api docs. @TODO
