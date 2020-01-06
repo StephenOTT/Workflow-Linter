@@ -21,7 +21,7 @@ import javax.inject.Inject
     info = Info(
         title = "Workflow Linter Server",
         version = "0.5",
-        description = "Workflow Linter Server for BPMN Workflows.  Lint your workflows!!",
+        description = "Workflow Linting Server for BPMN Workflows.",
         license = License(name = "", url = "http://github.com/stephenott/workflow-linter"),
         contact = Contact(url = "http://github.com/stephenott", name = "Stephen Russett", email = "http://github.com/stephenott")
     )
