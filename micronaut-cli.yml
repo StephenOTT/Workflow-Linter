@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: workflowlinter
+---
+testFramework: kotlintest
+sourceLanguage: kotlin
