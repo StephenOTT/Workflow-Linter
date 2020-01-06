@@ -2,10 +2,14 @@
 
 
 POST localhost:8080/workflow/bpmn/linter
+
 Multi-part form
 
 name: File
+
 type: file (.bpmn file)
+
+
 
 example output:
 
