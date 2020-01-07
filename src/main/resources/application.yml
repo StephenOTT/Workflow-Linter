@@ -1,3 +1,8 @@
 micronaut:
   application:
     name: workflow-linter
+
+linter:
+  kts:
+    rules:
+      - ./src/main/resources/rules/rule1.kts
