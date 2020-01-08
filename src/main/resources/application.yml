@@ -6,3 +6,4 @@ linter:
   kts:
     rules:
       - ./src/main/resources/rules/rule1.kts
+      - ./src/main/resources/rules/ruleTimerMin.kts

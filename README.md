@@ -607,14 +607,36 @@ Formatting rules enable you to prevent common errors in formatting of BPMN.
 
 ### Kotlin-Script (.kts) based linting rules
 
-Kotlin Script `.kts` linting rules provide a scripting based approach to writing linting rules.  Using the scripting approach provides rule writers the most flexibility and power, but requires more advanced skills compared to writing YAML based linting rules.
+Kotlin Script `.kts` linting rules provide a scripting based approach to writing linting rules.  
 
-Configure the paths of your .kts files in the configuration (@TODO)
+Using the scripting approach provides rule writers the most flexibility and power, but requires more advanced skills compared to writing YAML based linting rules.
+
+Configure the paths of your .kts files in the configuration:
+
+```yaml
+linter:
+  kts:
+    rules:
+      - ./src/main/resources/rules/rule1.kts
+      - ./src/main/resources/rules/ruleTimerMin.kts
+```
 
 Each script will be compiled are runtime and converted into ElementValidators.
 
+The following is a element validator kts (`ruleTimerMin.kts`) that ensures that there are no timers that are between 0 and 60 seconds.
+
 ```kotlin
-example goes here
+package rules
+
+import com.github.stephenott.workflowlinter.linter.elementValidator
+import com.github.stephenott.workflowlinter.linter.getDuration
+import io.zeebe.model.bpmn.instance.TimeDuration
+
+elementValidator<TimeDuration> { e, v ->
+    if (e.getDuration().seconds in 0..60){
+        v.addError(60, "Timers Durations must be greater than 60 seconds.")
+    }
+}
 ```
 
 # Workflow Sanitizer

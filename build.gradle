@@ -27,9 +27,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
 
     implementation "org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}"
+    runtime "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:${kotlinVersion}"
     implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}"
     implementation "org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}"
-
 
 
     implementation "io.micronaut:micronaut-runtime"

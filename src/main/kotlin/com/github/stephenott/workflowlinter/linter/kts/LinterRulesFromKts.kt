@@ -23,13 +23,6 @@ class LinterServerRulesFromKts : LinterRulesFromKts {
     @Inject
     lateinit var ktsRulesList: LinterRulesFromKtsCgf
 
-    private val scriptEngine: ScriptEngine = ScriptEngineManager().getEngineByExtension("kts")
-
-//    private val validatorsList = listOf(
-//        elementValidator<BaseElement> { element, validatorResultCollector ->
-//            validatorResultCollector.addWarning(0, "my linter warning")
-//        })
-
     private lateinit var validatorsList: List<ModelElementValidator<out ModelElementInstance>>
 
     override fun validators(): List<ModelElementValidator<out ModelElementInstance>> {
@@ -38,13 +31,14 @@ class LinterServerRulesFromKts : LinterRulesFromKts {
 
     @PostConstruct
     private fun processKtsFileList() {
+        //@TODO add try catch around- ./src/main/resources/rules/rule1.kts this to capture better error handling when scriptResult does not work
         val paths = ktsRulesList.rules
-        println("number of kts: ${paths.size}")
-        validatorsList =  paths.map { path ->
+        validatorsList = paths.map { path ->
+            val sm = ScriptEngineManager().getEngineByExtension("kts")
             val scriptReader = Files.newBufferedReader(path)
-            println("running!!")
-            val scriptResult = scriptEngine.eval("1+1")
-            println(scriptResult::class)
+            val scriptResult = sm.eval(scriptReader)
+
+            scriptReader.close()
             scriptResult as ModelElementValidator<out ModelElementInstance>
         }.toList()
     }
