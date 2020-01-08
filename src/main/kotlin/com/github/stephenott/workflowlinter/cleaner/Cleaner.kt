@@ -23,9 +23,9 @@ class Cleaner(private val validators: List<ModelElementValidator<*>>,
         model.validate(validators).results
                 .forEach { (element, results) ->
                     //@TODO add support for Gateway/sequence flow support to keep configs for default
-                    println(element.elementType.instanceType)
-                    println((element as BaseElement).id)
-                    println("NEW ELEMENT")
+//                    println(element.elementType.instanceType)
+//                    println((element as BaseElement).id)
+//                    println("NEW ELEMENT")
                     results.filter { it.code == CLEANER_CODE }.forEach cleaners@{ eResult ->
                         val newInstance = eResult.element.modelInstance.newInstance<BaseElement>(eResult.element.elementType, (eResult.element as BaseElement).id)
 
@@ -36,8 +36,6 @@ class Cleaner(private val validators: List<ModelElementValidator<*>>,
                         if (eResult.element.elementType.instanceType.kotlin.isSubclassOf(Expression::class)) {
                             return@cleaners
                         }
-
-                        println("cat")
 
                         if (eResult.element.elementType.instanceType == Collaboration::class.java) {
                             return@cleaners
@@ -116,7 +114,7 @@ class Cleaner(private val validators: List<ModelElementValidator<*>>,
 
                         if (eResult.element.elementType.instanceType.kotlin.isSubclassOf(Gateway::class)) {
                             val defaultAttributeValue = "default"
-                            println("DEFAULT: ${eResult.element.getAttributeValue("default")}")
+//                            println("DEFAULT: ${eResult.element.getAttributeValue("default")}")
                             if (eResult.element.getAttributeValue(defaultAttributeValue) != null) {
                                 newInstance.setAttributeValue(defaultAttributeValue, eResult.element.getAttributeValue(defaultAttributeValue))
                             }
@@ -126,7 +124,6 @@ class Cleaner(private val validators: List<ModelElementValidator<*>>,
                             newInstance.setAttributeValue("name", eResult.element.getAttributeValue("name"))
                         }
 
-                        println("reached replacement")
                         when (element.elementType.instanceType.kotlin) {
                             SubProcess::class -> {
                                 val elements = (element as SubProcess).flowElements

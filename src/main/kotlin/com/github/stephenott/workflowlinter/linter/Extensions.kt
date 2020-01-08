@@ -1,8 +1,10 @@
 package com.github.stephenott.workflowlinter.linter
 
 import io.zeebe.model.bpmn.instance.BaseElement
+import io.zeebe.model.bpmn.instance.TimeDuration
 import io.zeebe.model.bpmn.instance.zeebe.*
 import org.camunda.bpm.model.xml.instance.ModelElementInstance
+import java.time.Duration
 
 /**
  * Returns null if no task definition info
@@ -81,4 +83,8 @@ fun ZeebeTaskHeaders.noDuplicateKeys(restrictedKeys: List<String>? = null): Bool
         // no duplicate headers only if the header is in the restricted Keys list
         !this.headers.filter { it.key in restrictedKeys }.groupingBy { it.key }.eachCount().any { it.value > 1 }
     }
+}
+
+fun TimeDuration.getDuration(): Duration{
+    return Duration.parse(this.textContent)
 }

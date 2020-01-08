@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.annotations.info.Contact
 import io.swagger.v3.oas.annotations.info.Info
 import io.swagger.v3.oas.annotations.info.License
+import java.io.ByteArrayInputStream
 import javax.inject.Inject
 
 @OpenAPIDefinition(
@@ -36,6 +37,19 @@ class LinterController(){
     fun upload(file: CompletedFileUpload): Single<HttpResponse<LinterResponse<com.github.stephenott.workflowlinter.linter.ValidationResults>>> {
         return Single.fromCallable {
             lint(file.inputStream, rules)
+        }.map {
+            processLintResults(it)
+        }.onErrorResumeNext {
+            Single.error(IllegalArgumentException(it)) //@TODO crate custom error
+        }.map {
+            HttpResponse.ok(LinterResponse(it))
+        }
+    }
+
+    @Post(value = "/", consumes = [MediaType.APPLICATION_XML])
+    fun xmlSubmit(xml: Single<String>): Single<HttpResponse<LinterResponse<com.github.stephenott.workflowlinter.linter.ValidationResults>>> {
+        return xml.map {
+            lint(it.byteInputStream(), rules)
         }.map {
             processLintResults(it)
         }.onErrorResumeNext {

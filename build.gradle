@@ -25,6 +25,13 @@ dependencies {
     implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+
+    implementation "org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}"
+    runtime "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}"
+
+
     implementation "io.micronaut:micronaut-runtime"
     implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
 

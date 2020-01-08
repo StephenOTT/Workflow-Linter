@@ -22,7 +22,6 @@ object Helpers {
                 results.results
                         .flatMap { it.value }
                         .map {
-                            println(it.element.getAttributeValue("id"))
                             ValidationResult(it)
                         }
                         .groupBy({ it.elementId }, { it })

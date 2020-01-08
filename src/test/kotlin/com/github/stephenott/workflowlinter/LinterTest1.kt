@@ -1,6 +1,5 @@
 package com.github.stephenott.workflowlinter
 
-import com.github.stephenott.linter.linter.elementValidator
 
 //@MicronautTest
 //class LinterTest1(
