@@ -3,8 +3,11 @@ package com.github.stephenott.workflowlinter.linter
 import io.zeebe.model.bpmn.instance.BaseElement
 import io.zeebe.model.bpmn.instance.TimeDuration
 import io.zeebe.model.bpmn.instance.zeebe.*
+import io.zeebe.model.bpmn.util.time.Interval
 import org.camunda.bpm.model.xml.instance.ModelElementInstance
 import java.time.Duration
+import java.time.Instant
+import java.time.Period
 
 /**
  * Returns null if no task definition info
@@ -85,6 +88,12 @@ fun ZeebeTaskHeaders.noDuplicateKeys(restrictedKeys: List<String>? = null): Bool
     }
 }
 
-fun TimeDuration.getDuration(): Duration{
-    return Duration.parse(this.textContent)
+/**
+ * Gets the Timer in a Duration format (even if they provided a Period Format).
+ */
+fun TimeDuration.getDuration(startInstant: Instant = Instant.now()): Duration{
+    val parsedInterval = kotlin.runCatching { Interval.parse(this.textContent) }
+            .getOrDefault(Interval(Period.ZERO, Duration.ZERO))
+    val due = parsedInterval.toEpochMilli(startInstant.toEpochMilli()) // @TODO Review the timezone implications of this calc
+    return Duration.between(startInstant, Instant.ofEpochMilli(due))
 }
