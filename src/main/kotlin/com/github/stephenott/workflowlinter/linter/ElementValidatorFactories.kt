@@ -28,5 +28,3 @@ inline fun <reified T: ModelElementInstance> elementValidator(crossinline valida
         }
     }
 }
-
-
