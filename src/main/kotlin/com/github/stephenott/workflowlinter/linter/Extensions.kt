@@ -14,40 +14,40 @@ import java.time.Period
  * Returns null if no task definition info
  */
 fun BaseElement.getZeebeTaskDefinition(): ZeebeTaskDefinition? {
-    return this.extensionElements.elementsQuery.filterByType(ZeebeTaskDefinition::class.java)
-            .list().singleOrNull()
+    return this.extensionElements?.elementsQuery?.filterByType(ZeebeTaskDefinition::class.java)
+            ?.list()?.singleOrNull()
 }
 
 /**
  * Returns null if no headers
  */
 fun BaseElement.getZeebeTaskHeaders(): ZeebeTaskHeaders? {
-    return this.extensionElements.elementsQuery.filterByType(ZeebeTaskHeaders::class.java)
-            .list().singleOrNull()
+    return this.extensionElements?.elementsQuery?.filterByType(ZeebeTaskHeaders::class.java)
+            ?.list()?.singleOrNull()
 }
 
 /**
  * Returns nul if no subscription data
  */
 fun BaseElement.getZeebeSubscription(): ZeebeSubscription? {
-    return this.extensionElements.elementsQuery.filterByType(ZeebeSubscription::class.java)
-            .list().singleOrNull()
+    return this.extensionElements?.elementsQuery?.filterByType(ZeebeSubscription::class.java)
+            ?.list()?.singleOrNull()
 }
 
 /**
  * returns null if no IO mappings
  */
 fun BaseElement.getZeebeIoMapping(): ZeebeIoMapping? {
-    return this.extensionElements.elementsQuery.filterByType(ZeebeIoMapping::class.java)
-            .list().singleOrNull()
+    return this.extensionElements?.elementsQuery?.filterByType(ZeebeIoMapping::class.java)
+            ?.list()?.singleOrNull()
 }
 
 /**
  * Returns null if no loop characteristics
  */
 fun BaseElement.getZeebeLoopCharacteristics(): ZeebeLoopCharacteristics? {
-    return this.extensionElements.elementsQuery.filterByType(ZeebeLoopCharacteristics::class.java)
-            .list().singleOrNull()
+    return this.extensionElements?.elementsQuery?.filterByType(ZeebeLoopCharacteristics::class.java)
+            ?.list()?.singleOrNull()
 }
 
 /**
