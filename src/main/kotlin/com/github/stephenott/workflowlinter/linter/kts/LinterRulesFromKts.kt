@@ -25,6 +25,8 @@ class LinterServerRulesFromKts : LinterRulesFromKts {
 
     private lateinit var validatorsList: List<ModelElementValidator<out ModelElementInstance>>
 
+    private val scriptEngine: ScriptEngine = ScriptEngineManager().getEngineByExtension("kts")
+
     override fun validators(): List<ModelElementValidator<out ModelElementInstance>> {
         return validatorsList
     }
@@ -33,13 +35,26 @@ class LinterServerRulesFromKts : LinterRulesFromKts {
     private fun processKtsFileList() {
         //@TODO add try catch around- ./src/main/resources/rules/rule1.kts this to capture better error handling when scriptResult does not work
         val paths = ktsRulesList.rules
-        validatorsList = paths.map { path ->
-            val sm = ScriptEngineManager().getEngineByExtension("kts")
-            val scriptReader = Files.newBufferedReader(path)
-            val scriptResult = sm.eval(scriptReader)
+        val list: MutableList<ModelElementValidator<out ModelElementInstance>> = mutableListOf()
 
+        paths.forEach { path ->
+            println("Generating linter rules from $path")
+            val scriptReader = Files.newBufferedReader(path)
+            val bindings = scriptEngine.createBindings()
+            val scriptResult = scriptEngine.eval(scriptReader, bindings)
             scriptReader.close()
-            scriptResult as ModelElementValidator<out ModelElementInstance>
-        }.toList()
+
+            try {
+                val singleResult = scriptResult as ModelElementValidator<out ModelElementInstance>
+                list.add(singleResult)
+            } catch (e: Exception){
+                val listResult = (scriptResult as List<*>)
+                        .filterIsInstance<ModelElementValidator<out ModelElementInstance>>()
+                list.addAll(listResult)
+            } catch (e: Exception){
+                throw IllegalStateException("script $path did not return a model element validator or list of model element validators.")
+            }
+        }
+        validatorsList = list
     }
 }
