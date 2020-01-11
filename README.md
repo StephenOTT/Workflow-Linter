@@ -203,6 +203,8 @@ Using the scripting approach provides rule writers the most flexibility and powe
 
 By default the linter will look for a `./rules` folder and walk the folder (and any children folders) looking for .kts files.
 
+Kts files must return a ModelElementValidator or a list of ModelElementValidators.
+
 You can change the folder location with:
 
 ```yaml
